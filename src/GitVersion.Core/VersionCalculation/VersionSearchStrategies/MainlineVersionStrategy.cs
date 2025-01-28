@@ -226,7 +226,7 @@ internal sealed class MainlineVersionStrategy(
             if (item.IsMergeCommit())
             {
                 Lazy<IReadOnlyCollection<ICommit>> mergedCommitsInReverseOrderLazy = new(
-                    () => incrementStrategyFinder.GetMergedCommits(item, 1, Context.Configuration.Ignore).Reverse().ToList()
+                    () => incrementStrategyFinder.GetMergedCommits(item, 1, Context.Configuration.Ignore, Context.Configuration.Include).Reverse().ToList()
                 );
 
                 if ((configuration.TrackMergeMessage ?? Context.Configuration.TrackMergeMessage) == true
@@ -242,7 +242,7 @@ internal sealed class MainlineVersionStrategy(
                             if (configuration.IsMainBranch == true) throw new NotImplementedException();
 
                             mergedCommitsInReverseOrderLazy = new(
-                                () => incrementStrategyFinder.GetMergedCommits(item, 0, Context.Configuration.Ignore).Reverse().ToList()
+                                () => incrementStrategyFinder.GetMergedCommits(item, 0, Context.Configuration.Ignore, Context.Configuration.Include).Reverse().ToList()
                             );
                             childConfiguration = configuration;
                             childBranchName = iteration.BranchName;

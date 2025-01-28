@@ -8,7 +8,7 @@ public interface IIncrementStrategyFinder
     VersionField DetermineIncrementedField(
         ICommit currentCommit, ICommit? baseVersionSource, bool shouldIncrement, EffectiveConfiguration configuration, string? label);
 
-    IEnumerable<ICommit> GetMergedCommits(ICommit mergeCommit, int index, IIgnoreConfiguration ignore);
+    IEnumerable<ICommit> GetMergedCommits(ICommit mergeCommit, int index, IIgnoreConfiguration ignore, IIncludeConfiguration include);
 
     VersionField GetIncrementForcedByCommit(ICommit commit, IGitVersionConfiguration configuration);
 }

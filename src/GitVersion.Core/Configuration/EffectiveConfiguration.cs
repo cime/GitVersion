@@ -70,6 +70,7 @@ public record EffectiveConfiguration
         CommitMessageIncrementing = branchConfiguration.CommitMessageIncrementing.Value;
         VersionFilters = configuration.Ignore.ToFilters();
         Ignore = configuration.Ignore;
+        Include = configuration.Include;
         TracksReleaseBranches = branchConfiguration.TracksReleaseBranches ?? false;
         IsReleaseBranch = branchConfiguration.IsReleaseBranch ?? false;
         IsMainBranch = branchConfiguration.IsMainBranch ?? false;
@@ -128,6 +129,7 @@ public record EffectiveConfiguration
     public IEnumerable<IVersionFilter> VersionFilters { get; }
 
     public IIgnoreConfiguration Ignore { get; }
+    public IIncludeConfiguration Include { get; }
 
     public string? CommitDateFormat { get; }
 

@@ -16,6 +16,7 @@ public interface IGitRepository : IDisposable
     IRemoteCollection Remotes { get; }
 
     ICommit? FindMergeBase(ICommit commit, ICommit otherCommit);
+    IEnumerable<string> GetChangedFiles(ICommit commit);
     int UncommittedChangesCount();
     void DiscoverRepository(string? gitDirectory);
 }

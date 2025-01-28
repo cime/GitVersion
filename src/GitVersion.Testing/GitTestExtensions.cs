@@ -9,6 +9,7 @@ public static class GitTestExtensions
     private static int _pad = 1;
 
     public static Commit MakeACommit(this IRepository repository, string? commitMessage = null) => CreateFileAndCommit(repository, Guid.NewGuid().ToString(), commitMessage);
+    public static Commit MakeAFileCommit(this IRepository repository, string relativeFileName, string? commitMessage = null) => CreateFileAndCommit(repository, relativeFileName, commitMessage);
 
     public static void MergeNoFF(this IRepository repository, string branch) => MergeNoFF(repository, branch, Generate.SignatureNow());
 
@@ -23,10 +24,16 @@ public static class GitTestExtensions
 
     private static Commit CreateFileAndCommit(this IRepository repository, string relativeFileName, string? commitMessage = null)
     {
-        var randomFile = PathHelper.Combine(repository.Info.WorkingDirectory, relativeFileName);
+        var fileName = relativeFileName.Replace("/", Path.DirectorySeparatorChar.ToString());
+        var randomFile = PathHelper.Combine(repository.Info.WorkingDirectory, fileName);
         if (File.Exists(randomFile))
         {
             File.Delete(randomFile);
+        }
+        var directory = Path.GetDirectoryName(randomFile)!;
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
         }
 
         var totalWidth = 36 + (_pad++ % 10);
@@ -35,7 +42,7 @@ public static class GitTestExtensions
 
         Commands.Stage(repository, randomFile);
 
-        return repository.Commit(commitMessage ?? $"Test Commit for file '{relativeFileName}'",
+        return repository.Commit(commitMessage ?? $"Test Commit for file '{fileName}'",
             Generate.SignatureNow(), Generate.SignatureNow());
     }
 

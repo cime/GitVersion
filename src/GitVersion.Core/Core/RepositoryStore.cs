@@ -29,7 +29,7 @@ internal class RepositoryStore(ILog log, IGitRepository repository) : IRepositor
         return mergeBaseFinder.FindMergeBaseOf(branch, otherBranch);
     }
 
-    public ICommit? GetCurrentCommit(IBranch currentBranch, string? commitId, IIgnoreConfiguration ignore)
+    public ICommit? GetCurrentCommit(IBranch currentBranch, string? commitId, IIgnoreConfiguration ignore, IIncludeConfiguration include)
     {
         currentBranch.NotNull();
         ignore.NotNull();
@@ -61,6 +61,7 @@ internal class RepositoryStore(ILog log, IGitRepository repository) : IRepositor
         }
 
         commits = ignore.Filter(commits.ToArray());
+        commits = include.Filter(commits.ToArray(), repository);
         return commits.FirstOrDefault();
     }
 
@@ -207,7 +208,7 @@ internal class RepositoryStore(ILog log, IGitRepository repository) : IRepositor
             IBranch branch, IGitVersionConfiguration configuration, params IBranch[] excludedBranches)
         => FindCommitBranchesBranchedFrom(branch, configuration, (IEnumerable<IBranch>)excludedBranches);
 
-    public IReadOnlyList<ICommit> GetCommitLog(ICommit? baseVersionSource, ICommit currentCommit, IIgnoreConfiguration ignore)
+    public IReadOnlyList<ICommit> GetCommitLog(ICommit? baseVersionSource, ICommit currentCommit, IIgnoreConfiguration ignore, IIncludeConfiguration include)
     {
         currentCommit.NotNull();
         ignore.NotNull();
@@ -220,10 +221,10 @@ internal class RepositoryStore(ILog log, IGitRepository repository) : IRepositor
         };
 
         var commits = FilterCommits(filter).ToArray();
-        return ignore.Filter(commits).ToList();
+        return include.Filter(ignore.Filter(commits).ToArray(), this.repository).ToList();
     }
 
-    public IReadOnlyList<ICommit> GetCommitsReacheableFromHead(ICommit? headCommit, IIgnoreConfiguration ignore)
+    public IReadOnlyList<ICommit> GetCommitsReacheableFromHead(ICommit? headCommit, IIgnoreConfiguration ignore, IIncludeConfiguration include)
     {
         var filter = new CommitFilter
         {
@@ -232,7 +233,7 @@ internal class RepositoryStore(ILog log, IGitRepository repository) : IRepositor
         };
 
         var commits = FilterCommits(filter).ToArray();
-        return ignore.Filter(commits).ToList();
+        return include.Filter(ignore.Filter(commits).ToArray(), this.repository).ToList();
     }
 
     public IReadOnlyList<ICommit> GetCommitsReacheableFrom(IGitObject commit, IBranch branch)

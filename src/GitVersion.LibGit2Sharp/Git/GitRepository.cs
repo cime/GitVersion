@@ -93,4 +93,12 @@ internal sealed partial class GitRepository
 
         return changes.Count;
     }
+
+    public IEnumerable<string> GetChangedFiles(ICommit commit)
+    {
+        var current = RepositoryInstance.Commits.Single(x => x.Sha == commit.Sha);
+        var parent = current.Parents.FirstOrDefault();
+
+        return RepositoryInstance.Diff.Compare<TreeChanges>(parent?.Tree, current.Tree).Select(x => x.Path);
+    }
 }

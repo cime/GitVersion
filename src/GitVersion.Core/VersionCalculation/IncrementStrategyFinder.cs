@@ -76,7 +76,8 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
             baseVersionSource: baseVersionSource,
             currentCommit: currentCommit,
             label: label,
-            ignore: configuration.Ignore
+            ignore: configuration.Ignore,
+            include: configuration.Include
         );
 
         if (configuration.CommitMessageIncrementing == CommitMessageIncrementMode.MergeMessageOnly)
@@ -95,7 +96,7 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
             : RegexPatterns.Cache.GetOrAdd(messageRegex);
 
     private IReadOnlyCollection<ICommit> GetCommitHistory(string? tagPrefix, SemanticVersionFormat semanticVersionFormat,
-        ICommit? baseVersionSource, ICommit currentCommit, string? label, IIgnoreConfiguration ignore)
+        ICommit? baseVersionSource, ICommit currentCommit, string? label, IIgnoreConfiguration ignore, IIncludeConfiguration include)
     {
         var targetShas = new Lazy<HashSet<string>>(() =>
             taggedSemanticVersionRepository
@@ -106,7 +107,7 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
                 .ToHashSet()
         );
 
-        var intermediateCommits = this.repositoryStore.GetCommitLog(baseVersionSource, currentCommit, ignore);
+        var intermediateCommits = this.repositoryStore.GetCommitLog(baseVersionSource, currentCommit, ignore, include);
         var commitLog = intermediateCommits.ToDictionary(element => element.Id.Sha);
 
         foreach (var intermediateCommit in intermediateCommits.Reverse())
@@ -136,9 +137,9 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
     /// Get the sequence of commits in a repository between a <paramref name="baseCommit"/> (exclusive)
     /// and a particular <paramref name="headCommit"/> (inclusive)
     /// </summary>
-    private IEnumerable<ICommit> GetIntermediateCommits(ICommit? baseCommit, ICommit headCommit, IIgnoreConfiguration ignore)
+    private IEnumerable<ICommit> GetIntermediateCommits(ICommit? baseCommit, ICommit headCommit, IIgnoreConfiguration ignore, IIncludeConfiguration include)
     {
-        var map = GetHeadCommitsMap(headCommit, ignore);
+        var map = GetHeadCommitsMap(headCommit, ignore, include);
 
         var commitAfterBaseIndex = 0;
         if (baseCommit != null)
@@ -147,7 +148,7 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
             commitAfterBaseIndex = baseIndex + 1;
         }
 
-        var headCommits = GetHeadCommits(headCommit, ignore);
+        var headCommits = GetHeadCommits(headCommit, ignore, include);
         return new ArraySegment<ICommit>(headCommits, commitAfterBaseIndex, headCommits.Length - commitAfterBaseIndex);
     }
 
@@ -155,9 +156,9 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
     /// Get a mapping of commit shas to their zero-based position in the sequence of commits from the beginning of a
     /// repository to a particular <paramref name="headCommit"/>
     /// </summary>
-    private Dictionary<string, int> GetHeadCommitsMap(ICommit? headCommit, IIgnoreConfiguration ignore) =>
+    private Dictionary<string, int> GetHeadCommitsMap(ICommit? headCommit, IIgnoreConfiguration ignore, IIncludeConfiguration include) =>
         this.headCommitsMapCache.GetOrAdd(headCommit?.Sha ?? "NULL", () =>
-            GetHeadCommits(headCommit, ignore)
+            GetHeadCommits(headCommit, ignore, include)
                 .Select((commit, index) => (commit.Sha, Index: index))
                 .ToDictionary(t => t.Sha, t => t.Index));
 
@@ -165,9 +166,9 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
     /// Get the sequence of commits from the beginning of a repository to a particular
     /// <paramref name="headCommit"/> (inclusive)
     /// </summary>
-    private ICommit[] GetHeadCommits(ICommit? headCommit, IIgnoreConfiguration ignore) =>
+    private ICommit[] GetHeadCommits(ICommit? headCommit, IIgnoreConfiguration ignore, IIncludeConfiguration include) =>
         this.headCommitsCache.GetOrAdd(headCommit?.Sha ?? "NULL", () =>
-            [.. this.repositoryStore.GetCommitsReacheableFromHead(headCommit, ignore)]);
+            [.. this.repositoryStore.GetCommitsReacheableFromHead(headCommit, ignore, include)]);
 
     private VersionField? GetIncrementFromCommit(ICommit commit, Regex majorRegex, Regex minorRegex, Regex patchRegex, Regex noBumpRegex) =>
         this.commitIncrementCache.GetOrAdd(commit.Sha, () =>
@@ -182,7 +183,7 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
         return null;
     }
 
-    public IEnumerable<ICommit> GetMergedCommits(ICommit mergeCommit, int index, IIgnoreConfiguration ignore)
+    public IEnumerable<ICommit> GetMergedCommits(ICommit mergeCommit, int index, IIgnoreConfiguration ignore, IIncludeConfiguration include)
     {
         mergeCommit.NotNull();
 
@@ -197,7 +198,7 @@ internal class IncrementStrategyFinder(IRepositoryStore repositoryStore, ITagged
 
         ICommit findMergeBase = this.repositoryStore.FindMergeBase(baseCommit, mergedCommit)
             ?? throw new InvalidOperationException("Cannot find the base commit of merged branch.");
-        return GetIntermediateCommits(findMergeBase, mergedCommit, ignore);
+        return GetIntermediateCommits(findMergeBase, mergedCommit, ignore, include);
     }
 
     private static ICommit GetMergedHead(ICommit mergeCommit)

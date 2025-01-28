@@ -129,9 +129,16 @@ internal sealed record GitVersionConfiguration : BranchConfiguration, IGitVersio
     [JsonIgnore]
     IIgnoreConfiguration IGitVersionConfiguration.Ignore => Ignore;
 
+    [JsonIgnore]
+    IIncludeConfiguration IGitVersionConfiguration.Include => Include;
+
     [JsonPropertyName("ignore")]
     [JsonPropertyDescription("The header property for the ignore configuration.")]
     public IgnoreConfiguration Ignore { get; internal set; } = new();
+
+    [JsonPropertyName("include")]
+    [JsonPropertyDescription("The header property for the include configuration.")]
+    public IncludeConfiguration Include { get; internal set; } = new();
 
     public override IBranchConfiguration Inherit(IBranchConfiguration configuration) => throw new NotSupportedException();
 

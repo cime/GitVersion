@@ -624,6 +624,35 @@ Date and time in the format `yyyy-MM-ddTHH:mm:ss` (eg `commits-before:
 2015-10-23T12:23:15`) to setup an exclusion range. Effectively any commit before
 `commits-before` will be ignored.
 
+### include
+
+The header property for the `include` configuration.
+
+:::{.alert .alert-info}
+**Note:** When including a commit or a range of commits, they are only included in
+the search for a [version source][version-sources], not when calculating other
+parts of the version number, such as build metadata.
+:::
+
+#### paths
+
+A sequence of paths to be included in the version calculations. Useful for monorepositories. You can use either
+style below:
+
+```yaml
+include:
+  paths: ['folder1/.*', 'folder2/.*']
+```
+
+or
+
+```yaml
+include:
+  paths:
+    - 'folder1/.*'
+    - 'folder2/.*'
+```
+
 ### merge-message-formats
 
 Custom merge message formats to enable identification of merge messages that do not

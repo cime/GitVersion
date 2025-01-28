@@ -45,6 +45,7 @@ public interface IGitVersionConfiguration : IBranchConfiguration
     IReadOnlyDictionary<string, IBranchConfiguration> Branches { get; }
 
     IIgnoreConfiguration Ignore { get; }
+    IIncludeConfiguration Include { get; }
 
     IBranchConfiguration GetEmptyBranchConfiguration();
 }

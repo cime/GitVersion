@@ -17,11 +17,11 @@ public interface IRepositoryStore
 
     ICommit? FindMergeBase(ICommit commit, ICommit mainlineTip);
 
-    ICommit? GetCurrentCommit(IBranch currentBranch, string? commitId, IIgnoreConfiguration ignore);
+    ICommit? GetCurrentCommit(IBranch currentBranch, string? commitId, IIgnoreConfiguration ignore, IIncludeConfiguration include);
     ICommit? GetForwardMerge(ICommit? commitToFindCommonBase, ICommit? findMergeBase);
 
-    IReadOnlyList<ICommit> GetCommitLog(ICommit? baseVersionSource, ICommit currentCommit, IIgnoreConfiguration ignore);
-    IReadOnlyList<ICommit> GetCommitsReacheableFromHead(ICommit? headCommit, IIgnoreConfiguration ignore);
+    IReadOnlyList<ICommit> GetCommitLog(ICommit? baseVersionSource, ICommit currentCommit, IIgnoreConfiguration ignore, IIncludeConfiguration include);
+    IReadOnlyList<ICommit> GetCommitsReacheableFromHead(ICommit? headCommit, IIgnoreConfiguration ignore, IIncludeConfiguration include);
     IReadOnlyList<ICommit> GetCommitsReacheableFrom(IGitObject commit, IBranch branch);
 
     IBranch GetTargetBranch(string? targetBranchName);

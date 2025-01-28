@@ -22,6 +22,7 @@ internal abstract class ConfigurationBuilderBase<TConfigurationBuilder> : IConfi
     private string? noBumpMessage;
     private int? tagPreReleaseWeight;
     private IgnoreConfiguration ignore;
+    private IncludeConfiguration include;
     private string? commitDateFormat;
     private bool updateBuildNumber;
     private SemanticVersionFormat semanticVersionFormat;
@@ -182,6 +183,12 @@ internal abstract class ConfigurationBuilderBase<TConfigurationBuilder> : IConfi
     public virtual TConfigurationBuilder WithIgnoreConfiguration(IIgnoreConfiguration value)
     {
         this.ignore = (IgnoreConfiguration)value;
+        return (TConfigurationBuilder)this;
+    }
+
+    public virtual TConfigurationBuilder WithIncludeConfiguration(IIncludeConfiguration value)
+    {
+        this.include = (IncludeConfiguration)value;
         return (TConfigurationBuilder)this;
     }
 
@@ -348,6 +355,7 @@ internal abstract class ConfigurationBuilderBase<TConfigurationBuilder> : IConfi
         WithNoBumpMessage(value.NoBumpMessage);
         WithTagPreReleaseWeight(value.TagPreReleaseWeight);
         WithIgnoreConfiguration(value.Ignore);
+        WithIncludeConfiguration(value.Include);
         WithCommitDateFormat(value.CommitDateFormat);
         WithUpdateBuildNumber(value.UpdateBuildNumber);
         WithSemanticVersionFormat(value.SemanticVersionFormat);
@@ -407,6 +415,7 @@ internal abstract class ConfigurationBuilderBase<TConfigurationBuilder> : IConfi
             NoBumpMessage = this.noBumpMessage,
             TagPreReleaseWeight = this.tagPreReleaseWeight,
             Ignore = this.ignore,
+            Include = this.include,
             CommitDateFormat = this.commitDateFormat,
             UpdateBuildNumber = this.updateBuildNumber,
             SemanticVersionFormat = this.semanticVersionFormat,

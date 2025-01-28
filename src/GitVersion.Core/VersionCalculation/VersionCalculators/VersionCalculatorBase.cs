@@ -19,7 +19,8 @@ internal abstract class VersionCalculatorBase(
         var commitLogs = this.repositoryStore.GetCommitLog(
             baseVersionSource: baseVersionSource,
             currentCommit: Context.CurrentCommit,
-            ignore: Context.Configuration.Ignore
+            ignore: Context.Configuration.Ignore,
+            include: Context.Configuration.Include
         );
 
         int commitsSinceTag = commitLogs.Count;
